@@ -12,7 +12,7 @@ class Migrator:
 
     def inspect_directory(self):
         self.migration_files: list[str] = os.listdir(self.directory)
-        self.repetitions: list[str] = self.__get_repetitions(self.files)
+        self.repetitions: list[str] = self.__get_repetitions(self.migration_files)
 
     def __get_repetitions(self):
         prefixes = [file[:4] for file in self.migration_files]
