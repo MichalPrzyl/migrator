@@ -4,7 +4,7 @@ import os
 class Migrator:
     already_applied = ['0003_upie']
     migration_files = []
-    repetitions = []
+    repetitions = {}
 
     def __init__(self,
                  directory: str) -> None:
@@ -12,16 +12,16 @@ class Migrator:
 
     def inspect_directory(self):
         self.migration_files: list[str] = os.listdir(self.directory)
-        self.repetitions: list[str] = self.__get_repetitions(self.migration_files)
+        self.repetitions: list[str] = self.__get_repetitions()
 
     def __get_repetitions(self):
         prefixes = [file[:4] for file in self.migration_files]
         repetitions = set()
-
         if len(prefixes) != len(set(prefixes)):
             for prefix in prefixes:
                 if prefixes.count(prefix) > 1:
                     repetitions.add(prefix)
+        return repetitions
 
     def foo(self):
         for repetition in self.repetitions:
