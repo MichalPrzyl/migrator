@@ -85,13 +85,23 @@ class Migrator:
         desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
         correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)][0]
 
+        line_to_replace = self.get_dependency_string_to_replace(file)
+
 
         with open(file_path, 'r') as file:
             content = file.read()
 
-        new_content = content.replace(f"{old_dependency}", f"{new_dependency}")
+        new_content = content.replace(f"{line_to_replace}", f"(\'{self.directory}\', \'{correct_dependency}\')")
 
         with open(file_path, 'w') as file:
             file.write(new_content)
 
         print(f'Zmieniono zawartość pliku {file_path}.')
+
+    def get_dependency_string_to_replace(self, file_path):
+        with open(file_path, 'r') as file:
+            content = file.read()
+            lines = content.split('\n')
+            for line in lines:
+                if self.directory in line:
+                    return line
