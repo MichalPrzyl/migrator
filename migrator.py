@@ -22,7 +22,7 @@ class Migrator:
 
 
     def get_unapplied_files(self):
-        return [file for file in self.migration_files if file not in self.already_applied_files]
+        return sorted([file for file in self.migration_files if file not in self.already_applied_files])
 
     def check_numbers(self):
         if not self.repetition_exist():
