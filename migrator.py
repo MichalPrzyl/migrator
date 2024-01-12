@@ -95,7 +95,7 @@ class Migrator:
 
         new_content = content.replace(f"{line_to_replace}", f"(\'{self.directory}\', \'{correct_dependency}\')")
 
-        with open(file_path, 'w') as file:
+        with open(f"{self.directory}/{file_path}", 'w') as file:
             file.write(new_content)
 
         print(f'Zmieniono zawartość pliku {file_path}.')
