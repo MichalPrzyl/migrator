@@ -29,9 +29,6 @@ class Migrator:
             return True, 'ok'
         return False, 'repetition'
 
-    # def difference_is_ok(self):
-        # return bool(max(self.get_applied_prefixes()) - min(self.get_unapplied_prefixes()) == -1)
-
     def repetition_exist(self):
         for prefix in self.get_unapplied_prefixes():
             if prefix in self.get_applied_prefixes():
@@ -76,33 +73,6 @@ class Migrator:
             return f"0{number}"
         else:
             return f"{number}"
-
-
-    # def fix_repetition(self, repetition):
-    #     same_pref_reps = [file for file in self.migration_files if file.startswith(repetition)]
-    #     wrong_one_list = [file for file in same_pref_reps if file not in Migrator.already_applied]
-    #     assert len(wrong_one_list) == 1, ('More than 1 candidate to be correct migration: %s' % wrong_one_list) 
-    #     wrong_one = wrong_one_list[0]
-    #     correct_name = self.create_correct_name(wrong_one)
-    #     self.rename_file(wrong_one, correct_name)
-    #     self.replace_dependency(correct_name, )
-        
-    # def create_correct_name(self, wrong_name: str):
-    #     prefixes_integers = [int(element) for element in self.prefixes]
-    #     max_prefix = max(prefixes_integers)
-    #     new_prefix = max_prefix + 1
-
-    #     if new_prefix > 10 and new_prefix < 100:
-    #         new_prefix = f'00{new_prefix}'
-    #     if new_prefix >= 100 and new_prefix < 1000:
-    #         new_prefix = f'0{new_prefix}'
-    #     if new_prefix >= 1000:
-    #         new_prefix = f'{new_prefix}'
-    #     else:
-    #         new_prefix = f'000{new_prefix}'
-
-    #     postfix = wrong_name.split('_')[1]
-    #     return f"{new_prefix}_{postfix}"
 
     def rename_file(self, old_file_name, new_file_name):
         os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
