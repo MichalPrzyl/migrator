@@ -49,11 +49,21 @@ class Migrator:
         return [file[:4] for file in self.all_migration_files]
     
     def fix_repetitions(self):
+        # fixing name
         max_applied_prefix = max(self.get_applied_prefixes())
-        file_to_fix = [unapplied_migration for unapplied_migration in self.unapplied if int(unapplied_migration[:4]) == max_applied_prefix][0]
-        new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix + 1)}{file_to_fix[4:]}"
-        self.rename_file(file_to_fix, new_name)
+
+        for index, unapplied_migration in enumerate(self.unapplied):
+            new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+index)}_{self.get_postfix(unapplied_migration)}"
+            self.rename_file(unapplied_migration, new_name)
+
+    @staticmethod
+    def get_string_prefix_from_name(name):
+        return name[:4]
         
+    @staticmethod    
+    def get_postfix(name):
+        return name[5:]
+
     @staticmethod    
     def get_prefix_string_based_on_number(number):
         if number < 10:
