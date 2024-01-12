@@ -41,6 +41,14 @@ class Migrator:
     def create_correct_name(self, wrong_name: str):
         prefixes_integers = [int(element) for element in self.prefixes]
         new_prefix = max(prefixes_integers) + 1
+        
+        if new_prefix > 10 and new_prefix < 100:
+            new_prefix = f'00{new_prefix}'
+        if new_prefix >= 100 and new_prefix < 1000:
+            new_prefix = f'0{new_prefix}'
+        if new_prefix >= 1000:
+            new_prefix = f'{new_prefix}'
+
         postfix = wrong_name.split('_')[1]
         return f"{new_prefix}_{postfix}"
 
