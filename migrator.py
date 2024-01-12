@@ -2,7 +2,7 @@ import os
 
 
 class Migrator:
-    already_applied_files: list[str] = ['0001_first.py', '0002_another.py', '0003_upie.py', '0004_lol.py']
+    already_applied_files: list[str] = ['0001_first.py', '0002_another.py', '0003_upie.py']
     all_migration_files: list[str] = []
     unapplied: list[str] = []
 
@@ -54,6 +54,8 @@ class Migrator:
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+(index+1))}_{self.get_postfix(unapplied_migration)}"
             print(f"new_name: {new_name}")
             self.rename_file(unapplied_migration, new_name)
+            self.change_dependency(new_name)
+
 
     @staticmethod
     def get_string_prefix_from_name(name):
@@ -67,9 +69,9 @@ class Migrator:
     def get_prefix_string_based_on_number(number):
         if number < 10:
             return f"000{number}"
-        elif number >=10 and number < 100:
+        elif number >= 10 and number < 100:
             return f"00{number}"
-        elif number >=100 and number < 1000:
+        elif number >= 100 and number < 1000:
             return f"0{number}"
         else:
             return f"{number}"
@@ -78,15 +80,18 @@ class Migrator:
         os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
 
 
-    # def replace_dependency(self, file, old_dependency, new_dependency):
-    #     file_path = file
+    def change_dependency(self, file):
+        file_path = file
+        desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
+        correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)][0]
 
-    #     with open(file_path, 'r') as file:
-    #         content = file.read()
 
-    #     new_content = content.replace(f"{old_dependency}", f"{new_dependency}")
+        with open(file_path, 'r') as file:
+            content = file.read()
 
-    #     with open(file_path, 'w') as file:
-    #         file.write(new_content)
+        new_content = content.replace(f"{old_dependency}", f"{new_dependency}")
 
-    #     print(f'Zmieniono zawartość pliku {file_path}.')
+        with open(file_path, 'w') as file:
+            file.write(new_content)
+
+        print(f'Zmieniono zawartość pliku {file_path}.')

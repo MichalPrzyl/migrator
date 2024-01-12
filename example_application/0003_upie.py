@@ -1,3 +1,3 @@
 dependencies = [
-    '0002_another'
+    ('example_application', '0002_another')
 ]
