@@ -13,18 +13,24 @@ class Migrator:
     def inspect_directory(self):
         self.migration_files: list[str] = os.listdir(self.directory)
         self.unapplied: list[str] = self.get_unapplied_files()
-        print(f"status:\nis ok: %s" % self.check_numbers())
+        status, code = self.check_numbers()
+        print(f"status:\nis ok: %s" % status)
+        print("code: %s" % code)
+        if status == False:
+            if code == 'repetition':
+                self.fix_repetitions()
+
 
     def get_unapplied_files(self):
         return [file for file in self.migration_files if file not in self.already_applied_files]
 
     def check_numbers(self):
-        if self.difference_is_ok() and not self.repetition_exist():
-            return True
-        return False
+        if not self.repetition_exist():
+            return True, 'ok'
+        return False, 'repetition'
 
-    def difference_is_ok(self):
-        return bool(max(self.get_applied_prefixes()) - min(self.get_unapplied_prefixes()) == -1)
+    # def difference_is_ok(self):
+        # return bool(max(self.get_applied_prefixes()) - min(self.get_unapplied_prefixes()) == -1)
 
     def repetition_exist(self):
         for prefix in self.get_unapplied_prefixes():
@@ -42,9 +48,14 @@ class Migrator:
     def get_prefixes(self):
         return [file[:4] for file in self.all_migration_files]
     
-    # def fix_all_repetitions(self):
-    #     for repetition in self.repetitions:
-    #         self.fix_repetition(repetition)
+    def fix_repetitions(self):
+        max_applied_prefix = max(self.get_applied_prefixes())
+        file_to_fix = [unapplied_migration for unapplied_migration in self.unapplied if unapplied_migration[:4] == max_applied_prefix][0]
+        new_name = 'abc'
+        self.rename_file(file_to_fix, new_name)
+        
+
+
 
     # def fix_repetition(self, repetition):
     #     same_pref_reps = [file for file in self.migration_files if file.startswith(repetition)]
@@ -72,8 +83,8 @@ class Migrator:
     #     postfix = wrong_name.split('_')[1]
     #     return f"{new_prefix}_{postfix}"
 
-    # def rename_file(self, old_file_name, new_file_name):
-    #     os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
+    def rename_file(self, old_file_name, new_file_name):
+        os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
 
 
     # def replace_dependency(self, file, old_dependency, new_dependency):
