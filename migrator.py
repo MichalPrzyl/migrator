@@ -11,7 +11,7 @@ class Migrator:
         self.directory = directory
 
     def inspect_directory(self):
-        self.migration_files: list[str] = os.listdir(self.directory)
+        self.all_migration_files: list[str] = os.listdir(self.directory)
         self.unapplied: list[str] = self.get_unapplied_files()
         status, code = self.check_numbers()
         print(f"status:\nis ok: %s" % status)
@@ -22,7 +22,7 @@ class Migrator:
 
 
     def get_unapplied_files(self):
-        return sorted([file for file in self.migration_files if file not in self.already_applied_files])
+        return sorted([file for file in self.all_migration_files if file not in self.already_applied_files])
 
     def check_numbers(self):
         if not self.repetition_exist():
@@ -84,6 +84,7 @@ class Migrator:
         file_path = file
         desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
         print(f"desired_dependency_string_prefix: {desired_dependency_string_prefix}")
+        print(f"all_migration_files: {self.all_migration_files}")
         correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)][0]
 
         line_to_replace = self.get_dependency_string_to_replace(file)
