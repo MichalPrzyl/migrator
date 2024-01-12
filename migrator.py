@@ -5,6 +5,7 @@ class Migrator:
     already_applied_files: list[str] = ['0001_first.py', '0002_another.py', '0003_upie.py', '0004_lol.py']
     all_migration_files: list[str] = []
     unapplied: list[str] = []
+    fixed_migration_files: list[str] = []
 
     def __init__(self,
                  directory: str) -> None:
@@ -78,6 +79,7 @@ class Migrator:
 
     def rename_file(self, old_file_name, new_file_name):
         os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
+        self.fixed_migration_files.append(new_file_name)
 
 
     def change_dependency(self, file):
@@ -85,7 +87,12 @@ class Migrator:
         desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
         print(f"desired_dependency_string_prefix: {desired_dependency_string_prefix}")
         print(f"all_migration_files: {self.all_migration_files}")
-        correct_dependency = [x for x in os.listdir(self.directory) if x.startswith(desired_dependency_string_prefix)][0]
+        correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)]
+        if len(correct_dependency) > 0:
+            correct_dependency = correct_dependency[0]
+        else:
+            correct_dependency = [x for x in self.fixed_migration_files if x.startswith(desired_dependency_string_prefix)][0]
+
 
         line_to_replace = self.get_dependency_string_to_replace(file)
 
