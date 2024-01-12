@@ -87,12 +87,12 @@ class Migrator:
         desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
         print(f"desired_dependency_string_prefix: {desired_dependency_string_prefix}")
         print(f"all_migration_files: {self.all_migration_files}")
-        correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)]
+        correct_dependency = [x for x in self.fixed_migration_files if x.startswith(desired_dependency_string_prefix)]
         if len(correct_dependency) > 0:
             correct_dependency = correct_dependency[0]
             print("dependency found here - 1")
         else:
-            correct_dependency = [x for x in self.fixed_migration_files if x.startswith(desired_dependency_string_prefix)][0]
+            correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)][0]
             print("dependency found here - 2")
 
         print(f"correct_dependency: {correct_dependency}")
