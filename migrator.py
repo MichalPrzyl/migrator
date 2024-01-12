@@ -51,8 +51,9 @@ class Migrator:
     def fix_repetitions(self):
         # fixing name
         max_applied_prefix = max(self.get_applied_prefixes())
-
+        print(f"fixing repetitions")
         for index, unapplied_migration in enumerate(self.unapplied):
+            print(f"fixing: {unapplied_migration}")
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+index)}_{self.get_postfix(unapplied_migration)}"
             self.rename_file(unapplied_migration, new_name)
 
