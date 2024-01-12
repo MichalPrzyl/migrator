@@ -37,10 +37,12 @@ class Migrator:
         wrong_one = wrong_one_list[0]
         correct_name = self.create_correct_name(wrong_one)
         self.rename_file(wrong_one, correct_name)
+        self.replace_dependency(correct_name, )
         
     def create_correct_name(self, wrong_name: str):
         prefixes_integers = [int(element) for element in self.prefixes]
-        new_prefix = max(prefixes_integers) + 1
+        max_prefix = max(prefixes_integers)
+        new_prefix = max_prefix + 1
 
         if new_prefix > 10 and new_prefix < 100:
             new_prefix = f'00{new_prefix}'
@@ -56,3 +58,17 @@ class Migrator:
 
     def rename_file(self, old_file_name, new_file_name):
         os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
+
+
+    def replace_dependency(self, file, old_dependency, new_dependency):
+        file_path = file
+
+        with open(file_path, 'r') as file:
+            content = file.read()
+
+        new_content = content.replace(f"{old_dependency}", f"{new_dependency}")
+
+        with open(file_path, 'w') as file:
+            file.write(new_content)
+
+        print(f'Zmieniono zawartość pliku {file_path}.')
