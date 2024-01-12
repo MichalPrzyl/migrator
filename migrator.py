@@ -51,16 +51,14 @@ class Migrator:
         max_applied_prefix = max(self.get_applied_prefixes())
         print(f"fixing repetitions")
         for index, unapplied_migration in enumerate(self.unapplied):
-            print(f"fixing: {unapplied_migration}")
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+(index+1))}_{self.get_postfix(unapplied_migration)}"
-            print(f"new_name: {new_name}")
             self.rename_file(unapplied_migration, new_name)
-            # self.change_dependency(new_name)
 
         # fix dependencies on migrations that we renamed    
         all_fixed_migration_files_names = os.listdir(self.directory)
         for index, unapplied_migration in enumerate(self.fixed_migration_files):
             new_dependency = self.find_migration_file_with_its_index_minus_one(unapplied_migration)
+            self.change_dependency(unapplied_migration, new_dependency)
 
 
 
