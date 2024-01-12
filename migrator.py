@@ -101,7 +101,7 @@ class Migrator:
         print(f'Zmieniono zawartość pliku {file_path}.')
 
     def get_dependency_string_to_replace(self, file_path):
-        with open(file_path, 'r') as file:
+        with open(f"{self.directory}/{file_path}, 'r') as file:
             content = file.read()
             lines = content.split('\n')
             for line in lines:
