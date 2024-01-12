@@ -90,10 +90,12 @@ class Migrator:
         correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)]
         if len(correct_dependency) > 0:
             correct_dependency = correct_dependency[0]
+            print("dependency found here - 1")
         else:
             correct_dependency = [x for x in self.fixed_migration_files if x.startswith(desired_dependency_string_prefix)][0]
+            print("dependency found here - 2")
 
-
+        print(f"correct_dependency: {correct_dependency}")
         line_to_replace = self.get_dependency_string_to_replace(file)
 
 
