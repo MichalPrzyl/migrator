@@ -2,7 +2,7 @@ import os
 
 
 class Migrator:
-    already_applied = ['0003_upie']
+    already_applied = ['0003_upie.py']
     migration_files = []
     repetitions = {}
 
@@ -32,8 +32,9 @@ class Migrator:
 
     def fix_repetition(self, repetition):
         same_pref_reps = [file for file in self.migration_files if file.startswith(repetition)]
-        wrong_one = [file for file in same_pref_reps if file not in Migrator.already_applied]
-        assert len(wrong_one) == 1, ('More than 1 candidate to be correct migration: %s' % wrong_one) 
+        wrong_one_list = [file for file in same_pref_reps if file not in Migrator.already_applied]
+        assert len(wrong_one_list) == 1, ('More than 1 candidate to be correct migration: %s' % wrong_one_list) 
+        wrong_one = wrong_one_list[0]
         correct_name = self.create_correct_name(wrong_one)
         self.rename_file(wrong_one, correct_name)
         
@@ -44,4 +45,4 @@ class Migrator:
         return f"{new_prefix}_{postfix}"
 
     def rename_file(self, old_file_name, new_file_name):
-        os.rename(old_file_name, new_file_name, src_dir_fd=None, dst_dir_fd=None)
+        os.rename(old_file_name, new_file_name, src_dir_fd=self.directory, dst_dir_fd=self.directory)
