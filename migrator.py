@@ -88,7 +88,7 @@ class Migrator:
 
     def change_dependency(self, file_path, new_dependency):
        
-        line_to_replace = self.get_dependency_string_to_replace(file)
+        line_to_replace = self.get_dependency_string_to_replace(file_path)
 
         with open(f"{self.directory}/{file_path}", 'r') as file:
             content = file.read()
