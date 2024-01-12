@@ -85,7 +85,7 @@ class Migrator:
         desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
         print(f"desired_dependency_string_prefix: {desired_dependency_string_prefix}")
         print(f"all_migration_files: {self.all_migration_files}")
-        correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)][0]
+        correct_dependency = [x for x in os.listdir(self.directory) if x.startswith(desired_dependency_string_prefix)][0]
 
         line_to_replace = self.get_dependency_string_to_replace(file)
 
