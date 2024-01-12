@@ -55,8 +55,8 @@ class Migrator:
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+(index+1))}_{self.get_postfix(unapplied_migration)}"
             print(f"new_name: {new_name}")
             self.rename_file(unapplied_migration, new_name)
-            self.change_dependency(new_name)
-
+            # self.change_dependency(new_name)
+        print(f"self.fixed_migration_files: {self.fixed_migration_files}")
 
     @staticmethod
     def get_string_prefix_from_name(name):
