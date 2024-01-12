@@ -45,4 +45,4 @@ class Migrator:
         return f"{new_prefix}_{postfix}"
 
     def rename_file(self, old_file_name, new_file_name):
-        os.rename(old_file_name, new_file_name, src_dir_fd=self.directory, dst_dir_fd=self.directory)
+        os.rename(f"{self.directory}/{old_file_name}", f"{self.directory}/{new_file_name}")
