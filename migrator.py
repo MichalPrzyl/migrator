@@ -93,7 +93,7 @@ class Migrator:
         with open(f"{self.directory}/{file_path}", 'r') as file:
             content = file.read()
 
-        new_content = content.replace(f"{line_to_replace}", f"(\'{self.directory}\', \'{correct_dependency}\')")
+        new_content = content.replace(f"{line_to_replace}", f"\t(\'{self.directory}\', \'{correct_dependency}\')")
 
         with open(f"{self.directory}/{file_path}", 'w') as file:
             file.write(new_content)
