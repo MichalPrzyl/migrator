@@ -56,7 +56,13 @@ class Migrator:
             print(f"new_name: {new_name}")
             self.rename_file(unapplied_migration, new_name)
             # self.change_dependency(new_name)
-        print(f"self.fixed_migration_files: {self.fixed_migration_files}")
+
+        # fix dependencies on migrations that we renamed    
+        all_fixed_migration_files_names = os.listdir(self.directory)
+        for index, unapplied_migration in enumerate(self.fixed_migration_files):
+            new_dependency = self.find_migration_file_with_its_index_minus_one(unapplied_migration)
+
+
 
     @staticmethod
     def get_string_prefix_from_name(name):
@@ -82,27 +88,14 @@ class Migrator:
         self.fixed_migration_files.append(new_file_name)
 
 
-    def change_dependency(self, file):
-        file_path = file
-        desired_dependency_string_prefix = self.get_prefix_string_based_on_number(int(file[:4]) - 1)
-        print(f"desired_dependency_string_prefix: {desired_dependency_string_prefix}")
-        print(f"all_migration_files: {self.all_migration_files}")
-        correct_dependency = [x for x in self.fixed_migration_files if x.startswith(desired_dependency_string_prefix)]
-        if len(correct_dependency) > 0:
-            correct_dependency = correct_dependency[0]
-            print("dependency found here - 1")
-        else:
-            correct_dependency = [x for x in self.all_migration_files if x.startswith(desired_dependency_string_prefix)][0]
-            print("dependency found here - 2")
-
-        print(f"correct_dependency: {correct_dependency}")
+    def change_dependency(self, file_path, new_dependency):
+       
         line_to_replace = self.get_dependency_string_to_replace(file)
-
 
         with open(f"{self.directory}/{file_path}", 'r') as file:
             content = file.read()
-
-        new_content = content.replace(f"{line_to_replace}", f"\t(\'{self.directory}\', \'{correct_dependency}\')")
+        
+        new_content = content.replace(f"{line_to_replace}", f"\t(\'{self.directory}\', \'{new_dependency}\')")
 
         with open(f"{self.directory}/{file_path}", 'w') as file:
             file.write(new_content)
@@ -116,3 +109,11 @@ class Migrator:
             for line in lines:
                 if self.directory in line:
                     return line
+
+    def find_migration_file_with_its_index_minus_one(self, migration_file_name):
+        this_index = int(migration_file_name[:4])  # e.g. 4
+        new_index = this_index - 1
+        new_index_string = self.get_prefix_string_based_on_number(new_index)  # e.g. '0004'
+        all_migrations = os.listdir(self.directory)
+        correct_migration_file = [filename for filename in all_migrations if filename.startswith(new_index_string)][0]
+        return correct_migration_file
