@@ -2,7 +2,7 @@ import os
 
 
 class Migrator:
-    already_applied_files: list[str] = ['0001_first.py', '0002_another.py', '0003_upie.py']
+    already_applied_files: list[str] = ['0001_first.py', '0002_another.py', '0003_upie.py', '0004_lol.py']
     all_migration_files: list[str] = []
     unapplied: list[str] = []
 
