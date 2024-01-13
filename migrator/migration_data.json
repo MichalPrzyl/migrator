@@ -1,0 +1,19 @@
+[
+    {
+        "name": "other_app",
+        "path": "../backend/other_app",
+        "migrations": [
+            "0001_initial.py",
+            "0003_ehhh.py",
+            "0002_another_weird.py"
+        ]
+    },
+    {
+        "name": "main",
+        "path": "../backend/main",
+        "migrations": [
+            "0002_person_adress.py",
+            "0001_initial.py"
+        ]
+    }
+]
