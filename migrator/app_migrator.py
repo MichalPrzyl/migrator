@@ -64,7 +64,9 @@ class AppMigrator:
 
     def check_and_fix_dependencies(self):
         files_to_check = [file for file in self.all_migration_files if file not in self.already_applied_files]
+        logger.info(f"Files to check: {files_to_check}")
         for file in files_to_check:
+            logger.info(f"Checking file: {file}")
             file_prefix_string = file[:4]
             file_prefix = int(file_prefix_string)
             correct_internal_dep_prefix = file_prefix - 1
@@ -72,12 +74,20 @@ class AppMigrator:
             with open(f"{self.directory}/migrations/{file}", 'r') as mig_file:
                 content = mig_file.read()
                 lines = content.split('\n')
+                logger.info(f"lines: {lines}")
                 if not self.has_dependency(lines): continue
                 starting_line, ending_line = self.get_starting_and_ending_lines(lines)
+                logger.info(f"starting_line: {starting_line}")
+                logger.info(f"ending_line: {ending_line}")
                 for index, line in enumerate(lines):
-                    if index <= starting_line or index >= ending_line: continue
+                    logger.info(f"Enumerating line - index: {index}, line: {line}")
+                    if index < starting_line or index > ending_line:
+                        logger.info("Skipping the line")
+                        continue
 
+                    logger.info("check - 2")
                     if self.app in line:  
+                        logger.info("self app in line - True")
                         if correct_internal_dep_prefix_string in line:
                             continue  # means main dependency is correct
                         else:
@@ -87,6 +97,7 @@ class AppMigrator:
                                 self.change_dependency(f'{self.directory}/migrations/{file}', self.app, found_migration_file[:-3])
 
                     else:  # check other deps
+                        logger.info("self app in line - False")
                         start_index = line.index('(')
                         end_index = line.index(')')
                         dependency_tuple = eval(line[start_index:end_index+1])
