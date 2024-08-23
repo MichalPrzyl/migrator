@@ -127,19 +127,18 @@ class AppMigrator:
                 ending_line = index
                 break
         return starting_line, ending_line
-    
+
     @staticmethod
     def has_dependency(lines):
         for line in lines:
             if 'dependencies' in line:
                 return True
         return False
-            
 
     @staticmethod
     def get_string_prefix_from_name(name):
         return name[:4]
-        
+
     @staticmethod    
     def get_postfix(name):
         return name[5:]
@@ -159,14 +158,13 @@ class AppMigrator:
         os.rename(f"{self.directory}/migrations/{old_file_name}", f"{self.directory}/migrations/{new_file_name}")
         self.fixed_migration_files.append(new_file_name)
 
-
     def change_dependency(self, file_path, app, new_dependency):
-       
+
         line_to_replace = self.get_dependency_string_to_replace(file_path, app)
 
         with open(f"{file_path}", 'r') as file:
             content = file.read()
-        
+
         new_content = content.replace(f"{line_to_replace}", f"\t\t(\'{app}\', \'{new_dependency}\')")
 
         with open(f"{file_path}", 'w') as file:
