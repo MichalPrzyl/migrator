@@ -2,7 +2,10 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("music_app", "0001_add_notes")]
+    dependencies = [
+        ("music_app", "0001_add_notes")
+        ("user_app", "0059_migration_1")
+    ]
 
     operations = [
         migrations.DeleteModel("Tribble"),
