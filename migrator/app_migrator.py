@@ -69,6 +69,7 @@ class AppMigrator:
             logger.info(f"Checking file: {file}")
             file_prefix_string = file[:4]
             file_prefix = int(file_prefix_string)
+            # Get correct dependency - it's current migration number - 1
             correct_internal_dep_prefix = file_prefix - 1
             correct_internal_dep_prefix_string = self.get_prefix_string_based_on_number(correct_internal_dep_prefix)
             with open(f"{self.directory}/migrations/{file}", 'r') as mig_file:
@@ -76,6 +77,7 @@ class AppMigrator:
                 lines = content.split('\n')
                 logger.info(f"lines: {lines}")
                 if not self.has_dependency(lines): continue
+                # Get starting and ending lines with dependency
                 starting_line, ending_line = self.get_starting_and_ending_lines(lines)
                 logger.info(f"starting_line: {starting_line}")
                 logger.info(f"ending_line: {ending_line}")
@@ -98,8 +100,13 @@ class AppMigrator:
 
                     else:  # check other deps
                         logger.info("self app in line - False")
-                        start_index = line.index('(')
-                        end_index = line.index(')')
+                        try:
+                            start_index = line.index('(')
+                            end_index = line.index(')')
+                        except ValueError:
+                            # Bad migration formatting: There is no '(' char in line
+                            # with word "dependencies". Just continue to next line.
+                            continue
                         dependency_tuple = eval(line[start_index:end_index+1])
                         dep_app = dependency_tuple[0]
                         dep_file = dependency_tuple[1]
