@@ -1,19 +1,24 @@
 [
     {
-        "name": "other_app",
-        "path": "../backend/other_app",
+        "name": "user_app",
+        "path": "../test_django_project/user_app",
         "migrations": [
-            "0001_initial.py",
-            "0003_ehhh.py",
-            "0002_another_weird.py"
+            "0001_migration_1.py"
         ]
     },
     {
-        "name": "main",
-        "path": "../backend/main",
+        "name": "test_app",
+        "path": "../test_django_project/test_app",
         "migrations": [
-            "0002_person_adress.py",
-            "0001_initial.py"
+            "0001_create_models.py"
+        ]
+    },
+    {
+        "name": "music_app",
+        "path": "../test_django_project/music_app",
+        "migrations": [
+            "0001_add_notes.py",
+            "0002_add_more_notes.py"
         ]
     }
 ]

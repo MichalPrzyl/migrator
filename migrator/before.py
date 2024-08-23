@@ -27,7 +27,7 @@ def main():
 
 def save_data_to_json_file(data):
     with open('migration_data.json', 'w') as json_file:
-        json_file.write(json.dumps(data))
+        json_file.write(json.dumps(data, indent=4))
 
 def get_app_migrations(app_dir):
     reserved_names = ['__init__.py', '__pycache__']

@@ -1,1 +1,1 @@
-PROJECT_DIR=r'../backend'
+PROJECT_DIR=r'../test_django_project'
