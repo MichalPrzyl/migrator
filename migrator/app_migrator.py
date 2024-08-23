@@ -1,6 +1,8 @@
 import os
 from config import PROJECT_DIR
+import logging
 
+logger = logging.getLogger('migrator')
 
 class AppMigrator:
     already_applied_files: list[str] = []
@@ -11,6 +13,7 @@ class AppMigrator:
     def __init__(self,
                  directory: str,  #eg. '../backend/main
                  already_applied_files: [str]):
+
         self.directory = directory
         self.already_applied_files = already_applied_files
 
@@ -18,6 +21,7 @@ class AppMigrator:
         self.app = self.directory.split('/')[-1]
         self.all_migration_files: list[str] = [file for file in all_files if file not in ['__init__.py', '__pycache__']]
         self.unapplied: list[str] = self.get_unapplied_files()
+        logger.info("initialized AppMigrator")
 
     def check_and_fix_migration_order(self):
         status, code = self.check_numbers()
