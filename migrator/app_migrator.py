@@ -114,10 +114,24 @@ class AppMigrator:
                         logger.info(f"dep_file: {dep_file}")
                         for root, dirs, files in os.walk(f'{PROJECT_DIR}/{dep_app}/migrations'):
                             if f'{dep_file}.py' in files:
+                                logger.info("External dependency is OK")
                                 continue  # external dependency is ok
                             else:
+                                logger.info("External dependency is NOT OK")
                                 name_without_prefix = f'{dep_file[5:]}.py'
-                                found_migration_file = [m_file for m_file in files if m_file.endswith(name_without_prefix)][0]
+                                logger.info(f"name_without_prefix: {name_without_prefix}")
+
+                                try:
+                                    found_migration_file_helper = [m_file for m_file in files if m_file.endswith(name_without_prefix)]
+                                    logger.info(f"found_migration_file_helper: {found_migration_file_helper}")
+                                    found_migration_file= found_migration_file_helper[0]
+
+                                except Exception as e:
+                                    print(f"Cannot fix migrations dependency in app: {dep_app} - migration: {dep_file}")
+                                    logger.error(f"MP ERROR: {e}")
+                                    logger.info(f"files: {files}")
+
+                                logger.info(f"found_migration_file: {found_migration_file}")
                                 self.change_dependency(f'{self.directory}/migrations/{file}', dep_app, found_migration_file[:-3])
 
     @staticmethod

@@ -9,7 +9,7 @@ def main():
 
     os.system("python3 ../migrator/before.py")
 
-    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_hello_darkness_my_old_friend')])
+    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_first_user_app_migration')])
 
     os.system("python3 ../migrator/after.py")
 

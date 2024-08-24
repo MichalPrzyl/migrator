@@ -1,2 +1,2 @@
-rm -rf main_app
+./clean.sh
 python3 test.py
