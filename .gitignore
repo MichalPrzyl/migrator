@@ -1,3 +1,4 @@
 migrator/__pycache__
 __pycache__
 test/migration_data.json
+test/migrator.log

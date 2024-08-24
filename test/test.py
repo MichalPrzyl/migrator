@@ -2,12 +2,14 @@ import os
 
 def main():
     os.makedirs('test_django_project/main_app/migrations')
+    os.makedirs('test_django_project/user_app/migrations')
     create_migration_for_application("main_app", '0001', 'start', [])
+    create_migration_for_application("user_app", '0001', 'first_user_app_migration', [])
     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
 
     os.system("python3 ../migrator/before.py")
 
-    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('main_app', '0069_hello_darkness_my_old_friend')])
+    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_hello_darkness_my_old_friend')])
 
     os.system("python3 ../migrator/after.py")
 

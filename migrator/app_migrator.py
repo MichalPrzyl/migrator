@@ -110,6 +110,8 @@ class AppMigrator:
                         dependency_tuple = eval(line[start_index:end_index+1])
                         dep_app = dependency_tuple[0]
                         dep_file = dependency_tuple[1]
+                        logger.info(f"dep_app: {dep_app}")
+                        logger.info(f"dep_file: {dep_file}")
                         for root, dirs, files in os.walk(f'{PROJECT_DIR}/{dep_app}/migrations'):
                             if f'{dep_file}.py' in files:
                                 continue  # external dependency is ok
