@@ -7,11 +7,23 @@ def main():
     create_migration_for_application("user_app", '0001', 'first_user_app_migration', [])
     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
 
+    # Create json file with data about applied migrations.
     os.system("python3 ../migrator/before.py")
 
     create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_first_user_app_migration')])
 
+    # Fix project migrations and dependencies.
     os.system("python3 ../migrator/after.py")
+
+    # Checking if the file exists and have proper dependencies
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "user_app",
+        "0001_first_user_app_migration"
+    ) == True
+
+    os.system("./clean.sh")
+
 
 def create_migration_for_application(
         app: str, 
@@ -31,6 +43,17 @@ def create_migration_for_application(
     with open(f"test_django_project/{app}/migrations/{migration_number}_{migration_file_name}.py", "w") as file:
         file.write(migration_content)
 
+def check_file_for_patterns(filepath, pattern1, pattern2):
+    # Check if file exist
+    if not os.path.isfile(filepath):
+        return False, f"File doesn't exist: {filepath}"
+
+    with open(filepath, 'r') as file:
+        for line in file:
+            if pattern1 in line and pattern2 in line:
+                return True
+
+    return False, f"No line with both patterns: {pattern1, pattern2}"
 
 if __name__ == '__main__':
     main()
