@@ -4,8 +4,12 @@ def main():
     os.makedirs('test_django_project/main_app/migrations')
     create_migration_for_application("main_app", '0001', 'start', [])
     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
+
+    os.system("python3 ../migrator/before.py")
+
     create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('main_app', '0069_hello_darkness_my_old_friend')])
-    # os.system("python3 before.py")
+
+    os.system("python3 ../migrator/after.py")
 
 def create_migration_for_application(
         app: str, 
