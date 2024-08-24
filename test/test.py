@@ -37,7 +37,6 @@ def test_simple_internal_dependency():
 
     create_migration_for_application("main_app", '0002', 'another_one_third', [('main_app', '0001_start')])
 
-
     # Fix project migrations and dependencies.
     os.system("python3 ../migrator/after.py")
 
@@ -51,11 +50,38 @@ def test_simple_internal_dependency():
     os.system("./clean.sh")
 
 
-def test_lol2():
-    assert 1==1
-    assert 1==1
+def test_double_internal_dependency():
+    os.makedirs('test_django_project/main_app/migrations')
 
+    create_migration_for_application("main_app", '0001', 'start', [])
+    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
 
+    os.system("python3 ../migrator/before.py")
+
+    create_migration_for_application("main_app", '0002', 'weird_second', [('main_app', '0001_start')])
+    create_migration_for_application("main_app", '0003', 'weird_third', [('main_app', 'weird_second')])
+
+    os.system("python3 ../migrator/after.py")
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0002_another_one.py",
+        "main_app",
+        "0001_start"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_weird_second.py",
+        "main_app",
+        "0002_another_one"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0004_weird_third.py",
+        "main_app",
+        "0003_weird_second"
+    ) == True
+
+    os.system("./clean.sh")
 
 
 # UTILS
