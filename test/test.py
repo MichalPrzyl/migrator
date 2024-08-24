@@ -1,6 +1,7 @@
 import os
 
-def main():
+
+def test_find_and_change_external_dependency():
     os.makedirs('test_django_project/main_app/migrations')
     os.makedirs('test_django_project/user_app/migrations')
     create_migration_for_application("main_app", '0001', 'start', [])
@@ -25,6 +26,40 @@ def main():
     os.system("./clean.sh")
 
 
+def test_simple_internal_dependency():
+    os.makedirs('test_django_project/main_app/migrations')
+
+    create_migration_for_application("main_app", '0001', 'start', [])
+    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
+
+    # Create json file with data about applied migrations.
+    os.system("python3 ../migrator/before.py")
+
+    create_migration_for_application("main_app", '0002', 'another_one_third', [('main_app', '0001_start')])
+
+
+    # Fix project migrations and dependencies.
+    os.system("python3 ../migrator/after.py")
+
+    # Checking if the file exists and have proper dependencies
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "main_app",
+        "0002_another_one"
+    ) == True
+
+    os.system("./clean.sh")
+
+
+def test_lol2():
+    assert 1==1
+    assert 1==1
+
+
+
+
+# UTILS
+
 def create_migration_for_application(
         app: str, 
         migration_number: int,
@@ -43,6 +78,7 @@ def create_migration_for_application(
     with open(f"test_django_project/{app}/migrations/{migration_number}_{migration_file_name}.py", "w") as file:
         file.write(migration_content)
 
+
 def check_file_for_patterns(filepath, pattern1, pattern2):
     # Check if file exist
     if not os.path.isfile(filepath):
@@ -54,6 +90,3 @@ def check_file_for_patterns(filepath, pattern1, pattern2):
                 return True
 
     return False, f"No line with both patterns: {pattern1, pattern2}"
-
-if __name__ == '__main__':
-    main()
