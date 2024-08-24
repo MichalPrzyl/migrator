@@ -88,7 +88,7 @@ class AppMigrator:
                         continue
 
                     logger.info("check - 2")
-                    if self.app in line:  
+                    if self._is_line_external_dep(line):
                         logger.info("self app in line - True")
                         if correct_internal_dep_prefix_string in line:
                             continue  # means main dependency is correct
@@ -202,3 +202,10 @@ class AppMigrator:
         all_migrations = os.listdir(f"{self.directory}/migrations")
         correct_migration_file = [filename for filename in all_migrations if filename.startswith(new_index_string)][0]
         return correct_migration_file
+
+
+    def _is_line_external_dep(self, line):
+        if self.app in line:
+            return True
+        return False
+
