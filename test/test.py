@@ -1,7 +1,7 @@
 import os
 
 
-def test_find_and_change_external_dependency():
+def test_external_dependency():
     os.makedirs('test_django_project/main_app/migrations')
     os.makedirs('test_django_project/user_app/migrations')
     create_migration_for_application("main_app", '0001', 'start', [])
@@ -60,6 +60,7 @@ def test_double_internal_dependency():
 
     create_migration_for_application("main_app", '0002', 'weird_second', [('main_app', '0001_start')])
     create_migration_for_application("main_app", '0003', 'weird_third', [('main_app', 'weird_second')])
+    create_migration_for_application("main_app", '0004', 'weird_fourth', [('main_app', 'weird_third')])
 
     os.system("python3 ../migrator/after.py")
 
@@ -79,6 +80,12 @@ def test_double_internal_dependency():
         "test_django_project/main_app/migrations/0004_weird_third.py",
         "main_app",
         "0003_weird_second"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0005_weird_fourth.py",
+        "main_app",
+        "0004_weird_third"
     ) == True
 
     os.system("./clean.sh")
