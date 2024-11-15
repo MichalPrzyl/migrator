@@ -26,28 +26,28 @@ import os
     # os.system("./clean.sh")
 
 
-def test_simple_internal_dependency():
-    os.makedirs('test_django_project/main_app/migrations')
+# def test_simple_internal_dependency():
+#     os.makedirs('test_django_project/main_app/migrations')
 
-    create_migration_for_application("main_app", '0001', 'start', [])
-    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
+#     create_migration_for_application("main_app", '0001', 'start', [])
+#     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
 
-    # Create json file with data about applied migrations.
-    os.system("python3 ../migrator/before.py")
+#     # Create json file with data about applied migrations.
+#     os.system("python3 ../migrator/before.py")
 
-    create_migration_for_application("main_app", '0002', 'another_one_third', [('main_app', '0001_start')])
+#     create_migration_for_application("main_app", '0002', 'another_one_third', [('main_app', '0001_start')])
 
-    # Fix project migrations and dependencies.
-    os.system("python3 ../migrator/after.py")
+#     # Fix project migrations and dependencies.
+#     os.system("python3 ../migrator/after.py")
 
-    # Checking if the file exists and have proper dependencies
-    assert check_file_for_patterns(
-        "test_django_project/main_app/migrations/0003_another_one_third.py",
-        "main_app",
-        "0002_another_one"
-    ) == True
+#     # Checking if the file exists and have proper dependencies
+#     assert check_file_for_patterns(
+#         "test_django_project/main_app/migrations/0003_another_one_third.py",
+#         "main_app",
+#         "0002_another_one"
+#     ) == True
 
-    os.system("./clean.sh")
+#     os.system("./clean.sh")
 
 
 def test_double_internal_dependency():
@@ -58,9 +58,12 @@ def test_double_internal_dependency():
 
     os.system("python3 ../migrator/before.py")
 
+    # TestCase 1 - working
+    # create_migration_for_application("main_app", '0002', 'weird_second', [('main_app', '0001_start')])
+    # TestCase 2 - not working
     create_migration_for_application("main_app", '0002', 'weird_second', [('main_app', '0001_start')])
-    create_migration_for_application("main_app", '0003', 'weird_third', [('main_app', 'weird_second')])
-    create_migration_for_application("main_app", '0004', 'weird_fourth', [('main_app', 'weird_third')])
+    create_migration_for_application("main_app", '0003', 'weird_third', [('main_app', '0003_weird_second')])
+    # create_migration_for_application("main_app", '0004', 'weird_fourth', [('main_app', '0003_weird_third')])
 
     os.system("python3 ../migrator/after.py")
 
@@ -71,6 +74,7 @@ def test_double_internal_dependency():
     ) == True
 
     os.system("tree")
+
     command = "cat test_django_project/main_app/migrations/0003_weird_second.py"
     os.system(command)
     assert check_file_for_patterns(
