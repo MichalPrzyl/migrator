@@ -1,42 +1,6 @@
 import os
 
 
-def test_external_dependency():
-    os.makedirs('test_django_project/main_app/migrations')
-    os.makedirs('test_django_project/user_app/migrations')
-    # MAIN APP
-    create_migration_for_application("main_app", '0001', 'start', [])
-    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
-
-    # USER APP
-    create_migration_for_application("user_app", '0001', 'first_user_app_migration', [])
-
-    # Create json file with data about applied migrations.
-    os.system("python3 ../migrator/before.py")
-
-    # create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_first_user_app_migration')])
-    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0002_first_user_app_migration')])
-
-    # Fix project migrations and dependencies.
-    os.system("python3 ../migrator/after.py")
-
-    # Checking if the file exists and have proper dependencies
-
-    assert check_file_for_patterns(
-        "test_django_project/main_app/migrations/0003_another_one_third.py",
-        "main_app",
-        "0002_another_one"
-    ) == True
-
-    assert check_file_for_patterns(
-        "test_django_project/main_app/migrations/0003_another_one_third.py",
-        "user_app",
-        "0001_first_user_app_migration"
-    ) == True
-
-    os.system("./clean.sh")
-
-
 def test_simple_internal_dependency():
     os.makedirs('test_django_project/main_app/migrations')
 
@@ -58,11 +22,12 @@ def test_simple_internal_dependency():
         "0002_another_one"
     ) == True
 
-    os.system("./clean.sh")
 
+    os.system("./clean.sh")
 
 def test_double_internal_dependency():
     os.makedirs('test_django_project/main_app/migrations')
+
 
     create_migration_for_application("main_app", '0001', 'start', [])
     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
@@ -99,9 +64,45 @@ def test_double_internal_dependency():
         "0004_weird_third"
     ) == True
 
+
     os.system("./clean.sh")
 
-def test_multiple_internal_dependency():
+def test_external_dependency():
+    os.makedirs('test_django_project/main_app/migrations')
+    os.makedirs('test_django_project/user_app/migrations')
+    # MAIN APP
+    create_migration_for_application("main_app", '0001', 'start', [])
+    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
+
+    # USER APP
+    create_migration_for_application("user_app", '0001', 'first_user_app_migration', [])
+
+    # Create json file with data about applied migrations.
+    os.system("python3 ../migrator/before.py")
+
+    # create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_first_user_app_migration')])
+    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0002_first_user_app_migration')])
+
+    # Fix project migrations and dependencies.
+    os.system("python3 ../migrator/after.py")
+
+    # Checking if the file exists and have proper dependencies
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "main_app",
+        "0002_another_one"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "user_app",
+        "0001_first_user_app_migration"
+    ) == True
+
+    os.system("./clean.sh")
+
+def test_multiple_external_dependency():
     os.makedirs('test_django_project/main_app/migrations')
     os.makedirs('test_django_project/music_app/migrations')
 
@@ -155,7 +156,7 @@ def create_migration_for_application(
         migration_number: int,
         migration_file_name: str,
         dependencies: list[str]):
-    dependencies_str = ",\n\t\t\t\t\t\t".join([f'("{dep[0]}", "{dep[1]}")' for dep in dependencies])
+    dependencies_str = ",\n\t\t\t".join([f'("{dep[0]}", "{dep[1]}")' for dep in dependencies])
 
     migration_content = f"""class Migration(migrations.Migration):
     some random stuff
@@ -171,7 +172,6 @@ def create_migration_for_application(
 
     with open(f"test_django_project/{app}/migrations/{migration_number}_{migration_file_name}.py", "w") as file:
         file.write(migration_content)
-
 
 def check_file_for_patterns(filepath, pattern1, pattern2):
     # Check if file exist

@@ -13,7 +13,6 @@ class AppMigrator:
                  directory: str,  #eg. '../backend/main
                  already_applied_files: [str]):
 
-        print("\n\nSTARTING...")
         self.directory = directory
         self.already_applied_files = already_applied_files
 
@@ -82,6 +81,7 @@ class AppMigrator:
         max_applied_prefix = max(self.get_applied_prefixes())
         for index, unapplied_migration in enumerate(self.unapplied):
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+(index+1))}_{self.get_postfix(unapplied_migration)}"
+            print(f"[INFO]App: {self.app}: Changing migration name \"{unapplied_migration}\" to \"{new_name}\"")
             self.rename_file(unapplied_migration, new_name)
 
     def check_and_fix_dependencies(self):
@@ -197,12 +197,12 @@ class AppMigrator:
         self.fixed_migration_files.append(new_file_name)
 
     def change_dependency(self, file_path, app, new_dependency):
-        line_to_replace = self.get_dependency_string_to_replace(file_path, app)
+        string_to_replace = self.get_dependency_string_to_replace(file_path, app)
 
         with open(f"{file_path}", 'r') as file:
             content = file.read()
 
-        new_content = content.replace(f"{line_to_replace}", f"\t\t(\'{app}\', \'{new_dependency}\'),")
+        new_content = content.replace(f"{string_to_replace}", f"(\'{app}\', \'{new_dependency}\')")
 
         with open(f"{file_path}", 'w') as file:
             file.write(new_content)
@@ -213,7 +213,10 @@ class AppMigrator:
             content = file.read()
             lines = content.split('\n')
             found_index = self.get_line_index_with_content(lines, app)
-            return lines[found_index]
+            line = lines[found_index]
+            dependency_start_index = line.index('(')
+            dependency_end_index = line.index(')')
+            return line[dependency_start_index:dependency_end_index+1]
 
     def find_migration_file_with_its_index_minus_one(self, migration_file_name):
         this_index = int(migration_file_name[:4])  # e.g. 4
