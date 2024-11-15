@@ -1,53 +1,64 @@
 import os
 
 
-# def test_external_dependency():
-#     os.makedirs('test_django_project/main_app/migrations')
-#     os.makedirs('test_django_project/user_app/migrations')
-#     create_migration_for_application("main_app", '0001', 'start', [])
-#     create_migration_for_application("user_app", '0001', 'first_user_app_migration', [])
-#     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
+def test_external_dependency():
+    os.makedirs('test_django_project/main_app/migrations')
+    os.makedirs('test_django_project/user_app/migrations')
+    # MAIN APP
+    create_migration_for_application("main_app", '0001', 'start', [])
+    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
 
-#     # Create json file with data about applied migrations.
-#     os.system("python3 ../migrator/before.py")
+    # USER APP
+    create_migration_for_application("user_app", '0001', 'first_user_app_migration', [])
 
-#     create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_first_user_app_migration')])
+    # Create json file with data about applied migrations.
+    os.system("python3 ../migrator/before.py")
 
-#     # Fix project migrations and dependencies.
-#     os.system("python3 ../migrator/after.py")
+    # create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0069_first_user_app_migration')])
+    create_migration_for_application("main_app", '0003', 'another_one_third', [('main_app', '0002_another_one'), ('user_app', '0002_first_user_app_migration')])
 
-#     # Checking if the file exists and have proper dependencies
-#     assert check_file_for_patterns(
-#         "test_django_project/main_app/migrations/0003_another_one_third.py",
-#         "user_app",
-#         "0001_first_user_app_migration"
-#     ) == True
+    # Fix project migrations and dependencies.
+    os.system("python3 ../migrator/after.py")
 
-    # os.system("./clean.sh")
+    # Checking if the file exists and have proper dependencies
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "main_app",
+        "0002_another_one"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "user_app",
+        "0001_first_user_app_migration"
+    ) == True
+
+    os.system("./clean.sh")
 
 
-# def test_simple_internal_dependency():
-#     os.makedirs('test_django_project/main_app/migrations')
+def test_simple_internal_dependency():
+    os.makedirs('test_django_project/main_app/migrations')
 
-#     create_migration_for_application("main_app", '0001', 'start', [])
-#     create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
+    create_migration_for_application("main_app", '0001', 'start', [])
+    create_migration_for_application("main_app", '0002', 'another_one', [('main_app', '0001_start')])
 
-#     # Create json file with data about applied migrations.
-#     os.system("python3 ../migrator/before.py")
+    # Create json file with data about applied migrations.
+    os.system("python3 ../migrator/before.py")
 
-#     create_migration_for_application("main_app", '0002', 'another_one_third', [('main_app', '0001_start')])
+    create_migration_for_application("main_app", '0002', 'another_one_third', [('main_app', '0001_start')])
 
-#     # Fix project migrations and dependencies.
-#     os.system("python3 ../migrator/after.py")
+    # Fix project migrations and dependencies.
+    os.system("python3 ../migrator/after.py")
 
-#     # Checking if the file exists and have proper dependencies
-#     assert check_file_for_patterns(
-#         "test_django_project/main_app/migrations/0003_another_one_third.py",
-#         "main_app",
-#         "0002_another_one"
-#     ) == True
+    # Checking if the file exists and have proper dependencies
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_another_one_third.py",
+        "main_app",
+        "0002_another_one"
+    ) == True
 
-#     os.system("./clean.sh")
+    os.system("./clean.sh")
 
 
 def test_double_internal_dependency():
@@ -58,12 +69,9 @@ def test_double_internal_dependency():
 
     os.system("python3 ../migrator/before.py")
 
-    # TestCase 1 - working
-    # create_migration_for_application("main_app", '0002', 'weird_second', [('main_app', '0001_start')])
-    # TestCase 2 - not working
     create_migration_for_application("main_app", '0002', 'weird_second', [('main_app', '0001_start')])
     create_migration_for_application("main_app", '0003', 'weird_third', [('main_app', '0003_weird_second')])
-    # create_migration_for_application("main_app", '0004', 'weird_fourth', [('main_app', '0003_weird_third')])
+    create_migration_for_application("main_app", '0004', 'weird_fourth', [('main_app', '0003_weird_third')])
 
     os.system("python3 ../migrator/after.py")
 
@@ -73,27 +81,69 @@ def test_double_internal_dependency():
         "0001_start"
     ) == True
 
-    os.system("tree")
-
-    command = "cat test_django_project/main_app/migrations/0003_weird_second.py"
-    os.system(command)
     assert check_file_for_patterns(
         "test_django_project/main_app/migrations/0003_weird_second.py",
         "main_app",
         "0002_another_one"
     ) == True
 
-    # assert check_file_for_patterns(
-    #     "test_django_project/main_app/migrations/0004_weird_third.py",
-    #     "main_app",
-    #     "0003_weird_second"
-    # ) == True
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0004_weird_third.py",
+        "main_app",
+        "0003_weird_second"
+    ) == True
 
-    # assert check_file_for_patterns(
-    #     "test_django_project/main_app/migrations/0005_weird_fourth.py",
-    #     "main_app",
-    #     "0004_weird_third"
-    # ) == True
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0005_weird_fourth.py",
+        "main_app",
+        "0004_weird_third"
+    ) == True
+
+    os.system("./clean.sh")
+
+def test_multiple_internal_dependency():
+    os.makedirs('test_django_project/main_app/migrations')
+    os.makedirs('test_django_project/music_app/migrations')
+
+    create_migration_for_application("main_app", '0001', 'init', [])
+    create_migration_for_application("main_app", '0002', 'second_orig', [('main_app', '0001_init')])
+    create_migration_for_application("main_app", '0003', 'third_orig', [('main_app', '0002_second_orig')])
+
+    create_migration_for_application("music_app", '0001', 'music_init', [('main_app', '0001_init')])
+    create_migration_for_application("music_app", '0002', 'add_notes', [('music_app', '0001_music_init')])
+
+    os.system("python3 ../migrator/before.py")
+
+    create_migration_for_application("main_app", '0002', 'matrix', [('main_app', '0001_start')])
+    create_migration_for_application("main_app", '0003', 'expecto_patronum', [('main_app', '0002_matrix')])
+
+    create_migration_for_application("music_app", '0002', 'add_mozartella', [('main_app', '0002_matrix'), ('music_app', '0002_add_notes')])
+
+    os.system("python3 ../migrator/after.py")
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0004_matrix.py",
+        "main_app",
+        "0003_third_orig"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0005_expecto_patronum.py",
+        "main_app",
+        "0004_matrix"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/music_app/migrations/0003_add_mozartella.py",
+        "main_app",
+        "0004_matrix"
+    ) == True
+
+    assert check_file_for_patterns(
+        "test_django_project/music_app/migrations/0003_add_mozartella.py",
+        "music_app",
+        "0002_add_notes"
+    ) == True
 
     os.system("./clean.sh")
 
@@ -108,6 +158,9 @@ def create_migration_for_application(
     dependencies_str = ",\n\t\t\t\t\t\t".join([f'("{dep[0]}", "{dep[1]}")' for dep in dependencies])
 
     migration_content = f"""class Migration(migrations.Migration):
+    some random stuff
+    maybe here []
+    or here (): []
         dependencies = [{dependencies_str}]
 
         operations = [
