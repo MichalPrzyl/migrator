@@ -1,5 +1,5 @@
 import os
-from config import PROJECT_DIR
+from config import PROJECT_DIR, IGNORE_FILES
 import logging
 
 
@@ -19,7 +19,7 @@ class AppMigrator:
 
         all_files: list[str] = os.listdir(f"{self.directory}/migrations/")
         self.app = self.directory.split('/')[-1]
-        self.all_migration_files: list[str] = [file for file in all_files if file not in ['__init__.py', '__pycache__', 'custom']]
+        self.all_migration_files: list[str] = [file for file in all_files if file not in IGNORE_FILES]
         self.unapplied: list[str] = self.get_unapplied_files()
 
     def check_and_fix_migration_order(self):
@@ -99,13 +99,7 @@ class AppMigrator:
                 # Get starting and ending lines with dependency
                 # GET DEPENDENCY LINES
                 starting_line, ending_line = self.get_starting_and_ending_lines(lines)
-                print(f"starting_line: {starting_line}")
-                print(f"ending_line: {ending_line}")
                 dependencies_lines = lines[starting_line:ending_line+1]
-                for dependency_a in dependencies_lines:
-                    print(dependency_a)
-                print(100*'-')
-                print("hello?")
 
                 # ITERATE THROUGH DEPENDENCY LINES
                 for index, line in enumerate(dependencies_lines):
@@ -130,7 +124,6 @@ class AppMigrator:
                                 self.change_dependency(f'{self.directory}/migrations/{file}', self.app, right_part_dependency)
 
                     else:  # check other deps
-                        print(f"external dep")
                         try:
                             start_index = line.index('(')
                             end_index = line.index(')')
@@ -216,7 +209,6 @@ class AppMigrator:
 
     def get_dependency_string_to_replace(self, file_path, app):
         whole_path = f'{file_path}'
-        print(f"whole_path: {whole_path}")
         with open(f"{file_path}", 'r') as file:
             content = file.read()
             lines = content.split('\n')
@@ -238,7 +230,6 @@ class AppMigrator:
 
     def get_line_index_with_content(self, lines, pattern):
         found = [(index, element) for index, element in enumerate(lines) if pattern in element]
-        print(f"found: {found}")
         if len(found) == 0:
             return None
         elif len(found) == 1:
