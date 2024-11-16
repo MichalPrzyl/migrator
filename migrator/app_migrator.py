@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(filename='app_migrator.log',
     encoding='utf-8',
-    level=logging.ERROR,
+    level=logging.INFO,
     format='[%(levelname)s]:%(asctime)s:%(message)s',
     filemode='w'  # Reset log file after each run.
 )
@@ -16,11 +16,10 @@ class AppMigrator:
     fixed_migration_files: list[str] = []
 
     def __init__(self,
-                 directory: str,  #eg. '../backend/main
+                 directory: str,  #eg. '../backend/main'
                  already_applied_files: [str]):
 
         self.logger = logging.getLogger('AppMigrator')
-        self.logger.setLevel(logging.DEBUG)
         self.directory = directory
         self.already_applied_files = already_applied_files
 
@@ -89,7 +88,6 @@ class AppMigrator:
         max_applied_prefix = max(self.get_applied_prefixes())
         for index, unapplied_migration in enumerate(self.unapplied):
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+(index+1))}_{self.get_postfix(unapplied_migration)}"
-            # print(f"[INFO]App: {self.app}: Changing migration name \"{unapplied_migration}\" to \"{new_name}\"")
             self.logger.info(f"App: {self.app}: Changing migration name \"{unapplied_migration}\" to \"{new_name}\"")
             self.rename_file(unapplied_migration, new_name)
 
@@ -105,10 +103,9 @@ class AppMigrator:
                 content = mig_file.read()
                 lines = content.split('\n')
                 if not self.has_dependency(lines): continue
-                # Get starting and ending lines with dependency
                 # GET DEPENDENCY LINES
-                starting_line, ending_line = self.get_starting_and_ending_lines(lines)
-                dependencies_lines = lines[starting_line:ending_line+1]
+                starting_line_index, ending_line_index = self.get_starting_and_ending_lines(lines)
+                dependencies_lines = lines[starting_line_index:ending_line_index+1]
 
                 # ITERATE THROUGH DEPENDENCY LINES
                 for index, line in enumerate(dependencies_lines):
