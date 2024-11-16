@@ -2,6 +2,12 @@ import os
 from config import PROJECT_DIR, IGNORE_FILES
 import logging
 
+logging.basicConfig(filename='app_migrator.log',
+    encoding='utf-8',
+    level=logging.ERROR,
+    format='[%(levelname)s]:%(asctime)s:%(message)s',
+    filemode='w'  # Reset log file after each run.
+)
 
 class AppMigrator:
     already_applied_files: list[str] = []
@@ -13,6 +19,8 @@ class AppMigrator:
                  directory: str,  #eg. '../backend/main
                  already_applied_files: [str]):
 
+        self.logger = logging.getLogger('AppMigrator')
+        self.logger.setLevel(logging.DEBUG)
         self.directory = directory
         self.already_applied_files = already_applied_files
 
@@ -81,7 +89,8 @@ class AppMigrator:
         max_applied_prefix = max(self.get_applied_prefixes())
         for index, unapplied_migration in enumerate(self.unapplied):
             new_name = f"{self.get_prefix_string_based_on_number(max_applied_prefix+(index+1))}_{self.get_postfix(unapplied_migration)}"
-            print(f"[INFO]App: {self.app}: Changing migration name \"{unapplied_migration}\" to \"{new_name}\"")
+            # print(f"[INFO]App: {self.app}: Changing migration name \"{unapplied_migration}\" to \"{new_name}\"")
+            self.logger.info(f"App: {self.app}: Changing migration name \"{unapplied_migration}\" to \"{new_name}\"")
             self.rename_file(unapplied_migration, new_name)
 
     def check_and_fix_dependencies(self):
@@ -202,10 +211,12 @@ class AppMigrator:
         with open(f"{file_path}", 'r') as file:
             content = file.read()
 
-        new_content = content.replace(f"{string_to_replace}", f"(\'{app}\', \'{new_dependency}\')")
+        new_dependency_string = f"(\'{app}\', \'{new_dependency}\')"
+        new_file_content = content.replace(f"{string_to_replace}", new_dependency_string)
 
+        self.logger.info(f"Changing dependency from {string_to_replace} to {new_dependency_string} in migration: {file_path}")
         with open(f"{file_path}", 'w') as file:
-            file.write(new_content)
+            file.write(new_file_content)
 
     def get_dependency_string_to_replace(self, file_path, app):
         whole_path = f'{file_path}'
