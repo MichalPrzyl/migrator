@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(filename='app_migrator.log',
     encoding='utf-8',
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='[%(levelname)s]:%(asctime)s:%(message)s',
     filemode='w'  # Reset log file after each run.
 )
@@ -20,6 +20,7 @@ class AppMigrator:
                  already_applied_files: [str]):
 
         self.logger = logging.getLogger('AppMigrator')
+        self.logger.setLevel(logging.DEBUG)
         self.directory = directory
         self.already_applied_files = already_applied_files
 
@@ -30,6 +31,7 @@ class AppMigrator:
 
     def check_and_fix_migration_order(self):
         status, code = self.check_numbers()
+        # Code actually doesn't matter ¯\_(ツ)_/¯
         if status == False:
             self.fix_repetitions()
 
@@ -45,36 +47,21 @@ class AppMigrator:
             return_val = False, 'repetition'
             return return_val
 
-        x = self.prefixes_are_in_order()
-        print(f"x: {x}")
         if self.prefixes_are_in_order():
             pass
         else:
-            return_val = False, 'repetition'
+            return_val = False, 'wrong_order'
+
         return return_val
 
     def prefixes_are_in_order(self):
-        # Get highest applied migration prefix.
-        already_applied_prefixes = []
-        for applied in self.already_applied_files:
-            already_applied_prefixes.append(int(applied[:4]))
-
-        if already_applied_prefixes:
-            highest_applied_prefix = max(already_applied_prefixes)
-
         unapplied_prefixes = self.get_unapplied_prefixes()
-
-        unapplied_prefixes = []
-        for unapplied in self.unapplied:
-            unapplied_prefixes.append(int(unapplied[:4]))
-        if unapplied_prefixes:
-            lowest_unapplied_prefix = min(unapplied_prefixes)
-        if unapplied_prefixes and already_applied_prefixes:
-            if highest_applied_prefix == lowest_unapplied_prefix + 1:
-                pass
-            else:
-                return_val = False
-
+        applied_prefixes = self.get_applied_prefixes()
+        all_migration_prefixes_as_integers = unapplied_prefixes + applied_prefixes
+        if sorted(all_migration_prefixes_as_integers) == list(range(1, len(all_migration_prefixes_as_integers)+1)):
+            return True
+        else:
+            return False
 
     def repetition_exist(self):
         unapplied_prefixes = set(self.get_unapplied_prefixes())
@@ -128,8 +115,11 @@ class AppMigrator:
                     if '(' not in line or ')' not in line:
                         continue
 
+
+                    dependency_app = self.get_app_from_line(line)
+
                     # INTERNAL DEPENDENCY
-                    if self._is_line_internal_dep(line):
+                    if dependency_app == self.app:
                         if correct_internal_dep_prefix_string in line:
                             continue  # means main dependency is correct
                         # FIX INTERNAL DEPENDENCY
@@ -142,7 +132,8 @@ class AppMigrator:
                                 right_part_dependency = f'{found_migration_file[:-3]}'
                                 self.change_dependency(f'{self.directory}/migrations/{file}', self.app, right_part_dependency)
 
-                    else:  # check other deps
+                    # EXTERNAL DEPENDENCY (with existing app (to which dependency points))
+                    elif dependency_app in self.get_apps_list():
                         try:
                             start_index = line.index('(')
                             end_index = line.index(')')
@@ -173,6 +164,30 @@ class AppMigrator:
 
                                 except Exception as e:
                                     pass
+                    else:  # THERE IS NO APP IN THE PROJECT
+                        # TODO: Handle that? Or at least print that as warning?
+                        pass
+                        # self.logger.warning("Application \"{dependency_app}\" is not present in the project")
+
+
+    def get_app_from_line(self, line):
+        line = line.strip()
+        start_app_index = line.index("(\"")
+        end_app_index = line.index("\",")
+        app_name = line[start_app_index+2:end_app_index]
+        return app_name
+
+    def get_apps_list(self):
+        subfolders = [ f.path for f in os.scandir(PROJECT_DIR) if f.is_dir() ]
+        apps = []
+        for subfolder in subfolders:
+            app_name = os.path.basename(subfolder)
+            # Don't list main project folder (where settings.py is) and
+            # any of the ignored files.
+            if app_name not in IGNORE_FILES + [os.path.basename(PROJECT_DIR)]:
+                apps.append(app_name)
+
+        return apps
 
     def get_starting_and_ending_lines(self, lines):
         for index, line in enumerate(lines):

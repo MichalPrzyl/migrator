@@ -41,7 +41,7 @@ def test_reverted_order_problem_internal_dependency():
     # Create json file with data about applied migrations.
     os.system("python3 ../migrator/before.py")
 
-    create_migration_for_application("main_app", '0005', 'de_facto', [('main_app', '0001_start')])
+    create_migration_for_application("main_app", '0005', 'de_facto', [('main_app', '0001_alibaba'), ('invalid_app', '0002_cheese')])
 
     # Fix project migrations and dependencies.
     os.system("python3 ../migrator/after.py")
