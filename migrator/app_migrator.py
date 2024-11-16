@@ -124,7 +124,6 @@ class AppMigrator:
                             continue  # means main dependency is correct
                         # FIX INTERNAL DEPENDENCY
                         else:
-                            # TODO: Use self.search_for_file_in_dir() instead of for root in os.walk.
                             migration_files = self.get_dir_files(f'{self.directory}/migrations')
                             found_migration_file = [m_file for m_file in migration_files if m_file.startswith(correct_internal_dep_prefix_string)][0]
                             right_part_dependency = f'{found_migration_file[:-3]}'
@@ -138,9 +137,6 @@ class AppMigrator:
                         except ValueError:
                             # Bad migration formatting: There is no '(' char in line
                             # with word "dependencies". Just continue to next line.
-                            continue
-
-                        if "swappable_dependency" in line:
                             continue
 
                         dependency_tuple = eval(line[start_index:end_index+1])
