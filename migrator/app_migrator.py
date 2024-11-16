@@ -43,7 +43,17 @@ class AppMigrator:
             pass
         else:
             return_val = False, 'repetition'
+            return return_val
 
+        x = self.prefixes_are_in_order()
+        print(f"x: {x}")
+        if self.prefixes_are_in_order():
+            pass
+        else:
+            return_val = False, 'repetition'
+        return return_val
+
+    def prefixes_are_in_order(self):
         # Get highest applied migration prefix.
         already_applied_prefixes = []
         for applied in self.already_applied_files:
@@ -63,14 +73,17 @@ class AppMigrator:
             if highest_applied_prefix == lowest_unapplied_prefix + 1:
                 pass
             else:
-                return_val = False, 'ehh'
-        return return_val
+                return_val = False
+
 
     def repetition_exist(self):
-        for prefix in self.get_unapplied_prefixes():
-            if prefix in self.get_applied_prefixes():
-                return True
-        return False
+        unapplied_prefixes = set(self.get_unapplied_prefixes())
+        applied_prefixes = set(self.get_applied_prefixes())
+
+        if unapplied_prefixes.isdisjoint(applied_prefixes):
+            return False
+        else:
+            return True
 
     def get_unapplied_prefixes(self):
         output = []

@@ -25,6 +25,36 @@ def test_simple_internal_dependency():
 
     os.system("./clean.sh")
 
+def test_reverted_order_problem_internal_dependency():
+    """
+    Exists:
+        - main app 0001_init
+        - main app 0002_salami
+    Adding:
+        - main app 0005_de_facto
+    """
+    os.makedirs('test_django_project/main_app/migrations')
+
+    create_migration_for_application("main_app", '0001', 'init', [])
+    create_migration_for_application("main_app", '0002', 'salami', [('main_app', '0001_salami')])
+
+    # Create json file with data about applied migrations.
+    os.system("python3 ../migrator/before.py")
+
+    create_migration_for_application("main_app", '0005', 'de_facto', [('main_app', '0001_start')])
+
+    # Fix project migrations and dependencies.
+    os.system("python3 ../migrator/after.py")
+
+    # Checking if the file exists and have proper dependencies
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_de_facto.py",
+        "main_app",
+        "0002_salami"
+    ) == True
+
+    os.system("./clean.sh")
+
 def test_double_internal_dependency():
     os.makedirs('test_django_project/main_app/migrations')
 
