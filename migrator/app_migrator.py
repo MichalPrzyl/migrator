@@ -94,11 +94,6 @@ class AppMigrator:
     def check_and_fix_dependencies(self):
         files_to_check = [file for file in self.all_migration_files if file not in self.already_applied_files]
         for file in files_to_check:
-            file_prefix_string = file[:4]
-            file_prefix = int(file_prefix_string)
-            # Get correct dependency - it's current migration number - 1
-            correct_internal_dep_prefix = file_prefix - 1
-            correct_internal_dep_prefix_string = self.get_prefix_string_based_on_number(correct_internal_dep_prefix)
             with open(f"{self.directory}/migrations/{file}", 'r') as mig_file:
                 content = mig_file.read()
                 lines = content.split('\n')
@@ -115,22 +110,25 @@ class AppMigrator:
                     if '(' not in line or ')' not in line:
                         continue
 
-
                     dependency_app = self.get_app_from_line(line)
 
                     # INTERNAL DEPENDENCY
                     if dependency_app == self.app:
+                        file_prefix_string = file[:4]
+                        file_prefix = int(file_prefix_string)
+                        # Get correct dependency - it's current migration number - 1
+                        correct_internal_dep_prefix = file_prefix - 1
+                        correct_internal_dep_prefix_string = self.get_prefix_string_based_on_number(correct_internal_dep_prefix)
+
                         if correct_internal_dep_prefix_string in line:
                             continue  # means main dependency is correct
                         # FIX INTERNAL DEPENDENCY
                         else:
-                            for root, dirs, files in os.walk(f'{self.directory}/migrations'):
-                                if '__pycache__' in root: continue
-                                if 'custom' in root: continue
-                                found_migration_file = [m_file for m_file in files if m_file.startswith(correct_internal_dep_prefix_string)][0]
-                                new_dependency = f"'{self.app}', '{found_migration_file[:-3]}'"
-                                right_part_dependency = f'{found_migration_file[:-3]}'
-                                self.change_dependency(f'{self.directory}/migrations/{file}', self.app, right_part_dependency)
+                            # TODO: Use self.search_for_file_in_dir() instead of for root in os.walk.
+                            migration_files = self.get_dir_files(f'{self.directory}/migrations')
+                            found_migration_file = [m_file for m_file in migration_files if m_file.startswith(correct_internal_dep_prefix_string)][0]
+                            right_part_dependency = f'{found_migration_file[:-3]}'
+                            self.change_dependency(f'{self.directory}/migrations/{file}', self.app, right_part_dependency)
 
                     # EXTERNAL DEPENDENCY (with existing app (to which dependency points))
                     elif dependency_app in self.get_apps_list():
@@ -169,6 +167,11 @@ class AppMigrator:
                         pass
                         # self.logger.warning("Application \"{dependency_app}\" is not present in the project")
 
+
+    def get_dir_files(self, dir):
+        path = f'{self.directory}/migrations'
+        files = [ os.path.basename(f.path) for f in os.scandir(path) if f.is_file() ]
+        return files
 
     def get_app_from_line(self, line):
         line = line.strip()
