@@ -123,3 +123,39 @@ def check_file_for_patterns(filepath, pattern1, pattern2):
                 return True
 
     return False, f"No line with both patterns: {pattern1, pattern2}"
+
+
+def test_external_dependency_chain_shift():
+    os.makedirs('test_django_project/main_app/migrations')
+    os.makedirs('test_django_project/user_app/migrations')
+
+    create_migration_for_application("main_app", '0001', 'init', [])
+    create_migration_for_application("main_app", '0002', 'second', [('main_app', '0001_init')])
+
+    create_migration_for_application("user_app", '0001', 'init_user', [])
+
+    # Snapshot current migration state
+    os.system("python3 ../migrator/before.py")
+
+    # Introduce conflicting number and wrong external dependency
+    create_migration_for_application(
+        "main_app",
+        '0002',
+        'third_conflict',
+        [
+            ('main_app', '0001_init'),
+            ('user_app', '0099_init_user')  # wrong external reference
+        ]
+    )
+
+    os.system("python3 ../migrator/after.py")
+
+    # Expect renumbering and corrected external dependency
+    assert check_file_for_patterns(
+        "test_django_project/main_app/migrations/0003_third_conflict.py",
+        "user_app",
+        "0001_init_user"
+    ) == True
+
+    os.system("./clean.sh")
+
